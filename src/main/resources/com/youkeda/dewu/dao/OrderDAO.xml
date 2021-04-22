@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.youkeda.dewu.dao.OrderDAO">
+    <resultMap id="BaseResultMap" type="com.youkeda.dewu.dataobject.OrderDO">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="order_number" jdbcType="VARCHAR" property="orderNumber"/>
+        <result column="product_detail_id" jdbcType="VARCHAR" property="productDetailId"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="total_price" jdbcType="DOUBLE" property="totalPrice"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="gmt_created" jdbcType="TIMESTAMP" property="gmtCreated"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.youkeda.dewu.dataobject.OrderDO">
+        insert into `order` (id, order_number, user_id, product_detail_id, total_price, status, gmt_created, gmt_modified)
+        values (#{id}, #{orderNumber}, #{userId}, #{productDetailId}, #{totalPrice}, #{status}, now(), now())
+    </insert>
+
+    <select id="selectCounts" resultType="java.lang.Integer" parameterType="com.youkeda.dewu.param.QueryOrderParam">
+        select count(1) from `order`
+        <where>
+            <if test="productDetailId != null and productDetailId != ''">
+                and product_detail_id = #{productDetailId}
+            </if>
+            <if test="time != null">
+                and gmt_modified <![CDATA[ >= ]]> #{time}
+            </if>
+        </where>
+    </select>
+
+    <select id="pageQuery" parameterType="com.youkeda.dewu.param.QueryOrderParam" resultMap="BaseResultMap">
+        select * from `order`
+        <where>
+            <if test="productDetailId != null and productDetailId != ''">
+                and product_detail_id = #{productDetailId}
+            </if>
+            <if test="time != null">
+                and gmt_modified <![CDATA[ >= ]]> #{time}
+            </if>
+        </where>
+        <bind name="currentIndex" value="(pageNum - 1)* pageSize"/>
+        limit #{currentIndex},#{pageSize}
+    </select>
+
+    <select id="selectByOrderNumber" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select * from `order`
+        where order_number = #{orderNumber, jdbcType=VARCHAR}
+    </select>
+</mapper>
